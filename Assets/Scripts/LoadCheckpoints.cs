@@ -5,10 +5,17 @@ using System.Collections.Generic;
 public class LoadCheckpoints : MonoBehaviour {
 
     List<Vector3> checkpoints;
+    public Transform checkpointFab;
+    List<Object> checkpointGOs;
 
 	void Start () {
         checkpoints = new List<Vector3>();
+        checkpointGOs = new List<Object>();
         // CALL readCheckpoints HERE
+        readCheckpoints("Assets/testpoints.xyz");
+        printCheckpoints();
+        setUpCheckpoints();
+        EnterCheckpoint.loadList(checkpoints, checkpointGOs);
 	}
 
     public void readCheckpoints(string filename)
@@ -35,6 +42,25 @@ public class LoadCheckpoints : MonoBehaviour {
             }
 
             checkpoints.Add(new Vector3(values[0], values[1], values[2]));
+        }
+    }
+
+    public void printCheckpoints()
+    {
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
+            print("(" + checkpoints[i].x + ", " + checkpoints[i].y + ", " + checkpoints[i].z + ")");
+        }
+    }
+
+    public void setUpCheckpoints()
+    {
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
+            Object x = GameObject.Instantiate(checkpointFab, new Vector3(checkpoints[i].x, checkpoints[i].y, checkpoints[i].z), Quaternion.identity);
+            x.name = i.ToString();
+            checkpointGOs.Add(x);
+
         }
     }
 }
