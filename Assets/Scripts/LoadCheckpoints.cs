@@ -6,16 +6,16 @@ public class LoadCheckpoints : MonoBehaviour {
 
     List<Vector3> checkpoints;
     public Transform checkpointFab;
-    List<Object> checkpointGOs;
+    List<Object> checkpointTrans;
 
 	void Start () {
         checkpoints = new List<Vector3>();
-        checkpointGOs = new List<Object>();
+        checkpointTrans = new List<Object>();
         // CALL readCheckpoints HERE
-        readCheckpoints("Assets/testpoints.xyz");
+        readCheckpoints("Assets/race1.txt");
         printCheckpoints();
         setUpCheckpoints();
-        EnterCheckpoint.loadList(checkpoints, checkpointGOs);
+        EnterCheckpoint.loadList(checkpoints, checkpointTrans);
 	}
 
     public void readCheckpoints(string filename)
@@ -59,8 +59,14 @@ public class LoadCheckpoints : MonoBehaviour {
         {
             Object x = GameObject.Instantiate(checkpointFab, new Vector3(checkpoints[i].x, checkpoints[i].y, checkpoints[i].z), Quaternion.identity);
             x.name = i.ToString();
-            checkpointGOs.Add(x);
-
+            checkpointTrans.Add(x);
         }
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject check1 = (checkpointTrans[0] as Transform).gameObject;
+        GameObject check2 = (checkpointTrans[1] as Transform).gameObject;
+        if (check1 == null || check2 == null)
+            print("ajskdlf;ajkdfl;aj ksfjaklf;ajksd");
+        player.transform.position = check1.transform.position;
+        player.transform.LookAt(check2.transform);
     }
 }

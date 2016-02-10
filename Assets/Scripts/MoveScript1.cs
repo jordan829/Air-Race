@@ -25,10 +25,11 @@ public class MoveScript1 : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         triggerHeld = false;
-        scaleFactor = 100;
-        scaleAngle = 0.001f;
+        scaleFactor = 7500;
+        scaleAngle = 0.03f;
         CountingDown = true;
-        startTime = Time.time + 5;
+        int delayTime = 3;
+        startTime = Time.time + delayTime;
 	}
 	
 	// Update is called once per frame
@@ -54,7 +55,7 @@ public class MoveScript1 : MonoBehaviour {
         }
 
         controller = moveServer.getController(0);
-        if (controller != null)
+        if (controller != null && !MoveScript2.secondMoveType)
         {
             triggerValue = controller.triggerValue;
             position = controller.getPositionRaw();
@@ -68,16 +69,11 @@ public class MoveScript1 : MonoBehaviour {
                 {
                     positionDiff = (position - firstPosition) * scaleFactor;
                     positionDiff.z = -1 * positionDiff.z;
-                    Vector3 forward = transform.forward.normalized;
                     transform.gameObject.GetComponent<Rigidbody>().AddRelativeForce(positionDiff, ForceMode.VelocityChange);
-                    //transform.position = transform.position + (positionDiff * scaleFactor);
-
-                    angleDiff = transform.rotation * (rotationAngles * Quaternion.Inverse(firstAngles)); //angleDiff = (rotationAngles - firstAngles) * scaleAngle;
-                    //transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + angleDiff);
-                    angleDiff = Quaternion.Euler(0, angleDiff.eulerAngles.y,
-                        0);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, angleDiff, Time.time * scaleAngle);
-
+                    
+                    angleDiff = (rotationAngles * Quaternion.Inverse(firstAngles));
+                    //transform.rotation = transform.rotation * angleDiff;
+                    transform.rotation = Quaternion.Lerp(transform.rotation, transform.rotation * angleDiff, scaleAngle);
                 }
                 // else, set the standard values and work with them until not held
                 else
@@ -98,7 +94,7 @@ public class MoveScript1 : MonoBehaviour {
 
             GameObject.FindGameObjectWithTag("DebugText").GetComponent<UnityEngine.UI.Text>().text = "TriggerHeld: " + triggerHeld + "\n" +
                 "Current Position: (" + transform.position.x + ", " + transform.position.y + ", " + transform.position.z + ")\n" +
-                "Velocity: (" + vel.x + ", " + vel.y + ", " + vel.z + ")\n" +
+                "Velocity: " + vel.magnitude + "units\n" +
                 "Rotation: (" + transform.rotation.eulerAngles.x + ", " + transform.rotation.eulerAngles.y + ", " + transform.rotation.eulerAngles.z + ")";
         }
         else

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class EnterCheckpoint : MonoBehaviour {
 
     static List<Vector3> checkpoints;
-    static List<Object> checkpointGOs;
+    static List<Object> checkpointTrans;
 
     int checkNum;
     Quaternion lastOrientation;
@@ -15,6 +15,7 @@ public class EnterCheckpoint : MonoBehaviour {
 
     public static bool startCD;
     float restartTime;
+    int delayTime = 3;
 
 	// Use this for initialization
 	void Start () {
@@ -29,19 +30,21 @@ public class EnterCheckpoint : MonoBehaviour {
         GameObject.FindGameObjectWithTag("CheckNum").GetComponent<UnityEngine.UI.Text>().text = "Checkpoints Taken: " + checkNum;
         if (!finished)
         {
-            Transform look = checkpointGOs[checkNum] as Transform;
+            Transform look = checkpointTrans[checkNum] as Transform;
             GameObject.FindGameObjectWithTag("Direction").transform.LookAt(look);
 
-            distance = (transform.position - look.position).magnitude;
+            distance = (transform.position - look.position).magnitude / 12.0f;
             TextMesh textObject = GameObject.Find("DistanceText").GetComponent<TextMesh>();
-            textObject.text = distance.ToString() + " units";
+            textObject.text = distance.ToString() + " feet";
         }
         else
         {
             GameObject bleh = (GameObject.Find("DistanceText"));
             if(bleh != null)
                 bleh.SetActive(false);
-            GameObject.FindGameObjectWithTag("Direction").SetActive(false);
+            GameObject blue = GameObject.FindGameObjectWithTag("Direction");
+            if(blue != null)
+                blue.SetActive(false);
         }
 
         if (restartTime - Time.time >= 0)
@@ -57,6 +60,30 @@ public class EnterCheckpoint : MonoBehaviour {
         }
 	}
 
+    void OnCollisionEnter(Collision collision) 
+    {
+        if (collision.gameObject.layer == 8 && !finished)
+        {
+            if (checkNum > 0)
+            {
+                //GameObject x = checkpointTrans[checkNum - 1] as GameObject; // last checkpoint, should be inactive
+                transform.position = checkpoints[checkNum - 1]; //x.transform.position;
+                transform.rotation = lastOrientation;
+                startCD = true;
+                MoveScript1.CountingDown = true;
+                restartTime = Time.time + delayTime;
+            }
+            else
+            {
+                transform.position = new Vector3(0, 5, 100);
+                transform.rotation = Quaternion.identity;
+                startCD = true;
+                MoveScript1.CountingDown = true;
+                restartTime = Time.time + delayTime;
+            }
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
         // check if hit a checkpoint
@@ -69,7 +96,7 @@ public class EnterCheckpoint : MonoBehaviour {
                 checkNum++;
                 other.gameObject.SetActive(false);
                 lastOrientation = transform.rotation;
-                if (checkNum >= checkpointGOs.Count)
+                if (checkNum >= checkpointTrans.Count)
                 {
                     finished = true;
                 }
@@ -78,12 +105,12 @@ public class EnterCheckpoint : MonoBehaviour {
             {
                 // wrong checkpoint, reset position at last checkpoint
                 if(checkNum > 0) {
-                    //GameObject x = checkpointGOs[checkNum - 1] as GameObject; // last checkpoint, should be inactive
+                    //GameObject x = checkpointTrans[checkNum - 1] as GameObject; // last checkpoint, should be inactive
                     transform.position = checkpoints[checkNum - 1]; //x.transform.position;
                     transform.rotation = lastOrientation;
                     startCD = true; 
                     MoveScript1.CountingDown = true;
-                    restartTime = Time.time + 5;
+                    restartTime = Time.time + delayTime;
                 }
                 else
                 {
@@ -91,7 +118,7 @@ public class EnterCheckpoint : MonoBehaviour {
                     transform.rotation = Quaternion.identity;
                     startCD = true;
                     MoveScript1.CountingDown = true;
-                    restartTime = Time.time + 5;
+                    restartTime = Time.time + delayTime;
                 }
             }
         }
@@ -100,6 +127,6 @@ public class EnterCheckpoint : MonoBehaviour {
     public static void loadList(List<Vector3> x, List<Object> y)
     {
         checkpoints = x;
-        checkpointGOs = y;
+        checkpointTrans = y;
     }
 }
