@@ -16,8 +16,8 @@ public class MoveScript1 : MonoBehaviour {
     Quaternion firstAngles;
     Vector3 positionDiff;
     Quaternion angleDiff;
-    int scaleFactor;
-    float scaleAngle;
+    public static int scaleFactor;
+    public static float scaleAngle;
 
     public static bool CountingDown;
     float startTime;
@@ -25,7 +25,7 @@ public class MoveScript1 : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         triggerHeld = false;
-        scaleFactor = 7500;
+        scaleFactor = 10000;
         scaleAngle = 0.03f;
         CountingDown = true;
         int delayTime = 3;
@@ -61,6 +61,11 @@ public class MoveScript1 : MonoBehaviour {
             position = controller.getPositionRaw();
             rotationAngles = controller.getQuaternion();
 
+            if (controller.btnOnPress(MoveServerNS.MoveButton.BTN_MOVE))
+            {
+                moveServer.Send_calibrateOrientation(controller);
+            }
+
             // check if trigger pressed
             if (triggerValue > 0)
             {
@@ -72,8 +77,18 @@ public class MoveScript1 : MonoBehaviour {
                     transform.gameObject.GetComponent<Rigidbody>().AddRelativeForce(positionDiff, ForceMode.VelocityChange);
                     
                     angleDiff = (rotationAngles * Quaternion.Inverse(firstAngles));
+                    /*if (angleDiff.eulerAngles.z < 8.0 || (angleDiff.eulerAngles.z > 352.0))
+                    {
+                        angleDiff = Quaternion.Euler(angleDiff.eulerAngles.x, angleDiff.eulerAngles.y, 0);
+                    }
+                    if (rotationAngles.eulerAngles.y > 160.0 && rotationAngles.eulerAngles.y < 200.0)
+                    {
+                        angleDiff = Quaternion.Euler(angleDiff.eulerAngles.x, angleDiff.eulerAngles.y, -1* angleDiff.eulerAngles.z);
+
+                    } */
                     //transform.rotation = transform.rotation * angleDiff;
                     transform.rotation = Quaternion.Lerp(transform.rotation, transform.rotation * angleDiff, scaleAngle);
+                    //firstAngles = rotationAngles;
                 }
                 // else, set the standard values and work with them until not held
                 else

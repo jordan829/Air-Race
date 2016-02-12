@@ -12,7 +12,7 @@ public class LoadCheckpoints : MonoBehaviour {
         checkpoints = new List<Vector3>();
         checkpointTrans = new List<Object>();
         // CALL readCheckpoints HERE
-        readCheckpoints("Assets/race1.txt");
+        readCheckpoints("Assets/Competition_Track.txt");
         printCheckpoints();
         setUpCheckpoints();
         EnterCheckpoint.loadList(checkpoints, checkpointTrans);

@@ -16,16 +16,14 @@ public class MoveScript2 : MonoBehaviour {
     Quaternion firstAngles;
     Vector3 positionDiff;
     Quaternion angleDiff;
-    int scaleFactor;
-    float scaleAngle;
 
     public static bool secondMoveType;
 
 	// Use this for initialization
 	void Start () {
         triggerHeld = false;
-        scaleFactor = 7500;
-        scaleAngle = 0.03f;
+        MoveScript1.scaleFactor = 20000;
+        MoveScript1.scaleAngle = 0.03f;
         secondMoveType = false;
 	}
 	
@@ -33,9 +31,14 @@ public class MoveScript2 : MonoBehaviour {
 	void Update () {
 	    controller = moveServer.getController(0);
 
-        if (controller.btnOnPress(MoveServerNS.MoveButton.BTN_SELECT))
+        if (controller != null && controller.btnOnPress(MoveServerNS.MoveButton.BTN_SELECT))
         {
             secondMoveType = !secondMoveType;
+        }
+
+        if (controller != null && controller.btnOnPress(MoveServerNS.MoveButton.BTN_MOVE))
+        {
+            moveServer.Send_calibrateOrientation(controller);
         }
 
         if (controller != null && secondMoveType)
@@ -50,7 +53,7 @@ public class MoveScript2 : MonoBehaviour {
                 // check if previously held
                 if (triggerHeld && !MoveScript1.CountingDown)
                 {
-                    positionDiff = ((position - firstPosition) * scaleFactor);
+                    positionDiff = ((position - firstPosition) * MoveScript1.scaleFactor);
                     positionDiff.z = -1 * positionDiff.z;
                     transform.gameObject.GetComponent<Rigidbody>().AddRelativeForce(positionDiff, ForceMode.VelocityChange);
                     if (controller.btnPressed(MoveServerNS.MoveButton.BTN_CROSS))
@@ -64,7 +67,7 @@ public class MoveScript2 : MonoBehaviour {
 
                     angleDiff = (rotationAngles * Quaternion.Inverse(firstAngles));
                     angleDiff = Quaternion.Euler(-1 * transform.rotation.eulerAngles.x, angleDiff.eulerAngles.y, -1 * transform.rotation.eulerAngles.z);
-                    transform.rotation = Quaternion.Lerp(transform.rotation, transform.rotation * angleDiff, scaleAngle);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, transform.rotation * angleDiff, MoveScript1.scaleAngle);
 
                 }
                 // else, set the standard values and work with them until not held
